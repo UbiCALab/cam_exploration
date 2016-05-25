@@ -1,0 +1,14 @@
+<launch>
+
+    <arg name="rviz_cfg"                default="" />
+    <arg name="rtab_lfile"              default="rtab_setup.launch"/>
+    <arg name="laser"                   default="false"/>
+
+
+    <!-- launch rtab_map   -->
+    <include unless="$(arg laser)" file="$(find cam_exploration)/launch/$(arg rtab_lfile)"/>
+    <include if="$(arg laser)" file="$(find rtab_sim_launch)/launch/rtab_setup_laser.launch"/>
+
+    <!-- rviz -->
+    <node pkg="rviz" type="rviz" name="rviz" args="$(arg rviz_cfg)"/>
+</launch>
