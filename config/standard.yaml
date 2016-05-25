@@ -1,0 +1,30 @@
+
+cam_exploration:
+
+    # Frontier value
+    frontier_value:
+        functions:
+            - min_euclidian_distance
+        min_euclidian_distance: { weight: "0",
+                                  dispersion: "3"}
+        min_astar_distance: { weight: "1",
+                                  dispersion: "3"}
+        minimum_frontier_size: 15
+
+    # Goal selection
+    goal_selector:
+        type: mid_point
+        distance_to_goal: 1.2
+
+    # Replaning
+    replaning:
+        conditions:
+            - not_moving
+            - too_much_time_near_goal
+            - isolated_goal
+        too_much_time_near_goal: { time_threshold: "0.3",
+                                   distance_threshold: "0.5",
+                                   orientation_threshold: "0.45"
+                                 }
+        isolated_goal:          {  depth: "4" }
+
