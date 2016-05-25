@@ -1,6 +1,31 @@
+
+/*
+ * MIT License
+ *
+ * Copyright (c) 2016 Jordi Soler Busquets
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #include <cam_exploration/AStar.h>
 
-/** 
+/**
  * @file AStar.cpp
  * @brief AStar library implementation
  * @author Jordi Soler
@@ -16,27 +41,27 @@ namespace cam_exploration{
 namespace strategy {
 
 
-/** 
+/**
  * @brief Functor that checks wether a cell has a certain identifier
  */
 struct hasId
 {
-    /** 
+    /**
      * @brief Constructor
-     * 
+     *
      * @param id Identifier to be checked
      */
     hasId(int id) : id_(id) {}
-    /** 
+    /**
      * @brief Checking implementation
-     * 
+     *
      * @param c cell to be evaluated
-     * 
+     *
      * @return True if has the desired identifier, false otherwise
      */
     bool operator()(cell c) { return c.id == id_;}
 private:
-    /** 
+    /**
      * @brief Desired identifier
      */
     int id_;
@@ -186,25 +211,25 @@ bool AStar::loopNeighbours(cell& c)
 }
 
 
-/** 
+/**
  * @brief Get the cost of a cell
- * 
+ *
  * In the case that the cell is not free, return the maximum cost allowed
  *
  * @param c Cell to be evaluated
- * 
+ *
  * @return Cell's cost
  */
 aInt freeCellCost(const cell& c)
 {
     return c.closed ? numeric_limits<aInt>::max() : c.cost();
 }
-/** 
+/**
  * @brief Check if \p c1 has less cost than \p c2
- * 
+ *
  * @param c1 Cell 1
  * @param c2 Cell 2
- * 
+ *
  * @return True if the first has lower cost, false otherwise
  */
 bool lessThan(const cell& c1, const cell& c2)
@@ -217,11 +242,11 @@ cell* AStar::getLowest()
 }
 
 
-/** 
+/**
  * @brief Check wether a cell is open
- * 
+ *
  * @param c Cell to be evaluated
- * 
+ *
  * @return True if the cell is open, false otherwise
  */
 bool isOpen(const cell& c) { return !c.closed; }
