@@ -110,6 +110,8 @@ private:
 class FrontiersMap
 {
 public:
+    typedef std::list<frontier>::const_iterator const_iterator;
+
     FrontiersMap();		///< Parameterless constructor
     ~FrontiersMap();		///< Parameterless destructor
 
@@ -145,6 +147,13 @@ public:
      * @return Most valued frontier
      */
     frontier max();
+
+    /**
+     * @brief Iterator-like operations to access fvalues
+     */
+    const_iterator begin() const {return frontiers_.begin();}
+    const_iterator sbegin();	/// < Sort before returning first element iterator
+    const_iterator end() const {return frontiers_.end();} ///< @copydoc begin()
 
     /**
      * @brief Get parameters from parameter server
@@ -191,12 +200,12 @@ public:
     int verbosity;
 
 private:
-    std::list<frontier> frontiers_;			///< Container of frontiers
+    std::list<frontier> frontiers_;	///< Container of frontiers
 
-    std::vector<strategy::frontierValue*> fvalues;	///< Collection of frontier evaluation objects
+    fvalueType fvalues;			///< Collection of frontier evaluation objects
 
-    bool isConfigured;					///< Is the map of frontiers configured? (e.g. has getParams been called?)
-    unsigned int minimum_size_;				///< Which is the minimum size a frontier should has in order to be considered?
+    bool isConfigured;			///< Is the map of frontiers configured? (e.g. has getParams been called?)
+    unsigned int minimum_size_;		///< Which is the minimum size a frontier should has in order to be considered?
 };
 
 

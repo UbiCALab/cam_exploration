@@ -135,6 +135,14 @@ IsolatedGoal::IsolatedGoal(std::map<std::string, std::string> params)
 	}
 
     }
+
+    // Publish goal neighbourhood
+    MarkerPublisher mpublisher;
+    std_msgs::ColorRGBA color;
+    color.r = 0.8; color.g = 0.2; color.b = 0.0; color.a = 1.0;
+
+    mpublisher.add("goal_neighbour_cells", "goal_neighbour_cells");
+    mpublisher.setProperty("goal_neighbour_cells", color);
 }
 
 bool IsolatedGoal::replan()
@@ -145,11 +153,13 @@ bool IsolatedGoal::replan()
 
 bool IsolatedGoal::isNearFrontier()
 {
-    geometry_msgs::Point current_goal = RobotMotion::current_goal().position;
+    geometry_msgs::Point current_goal = RobotMotion::current_frontier_target_point();
 
     MapServer maps;
     vector<int> neighs = maps.getNeighbours(current_goal, depth_);
 
+    MarkerPublisher mpublisher;
+    mpublisher.publish("goal_neighbour_cells", neighs);
 
     for (vector<int>::iterator it = neighs.begin(); it != neighs.end(); ++it){
     	if (maps.isFrontierCell(*it))

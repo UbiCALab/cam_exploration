@@ -1,6 +1,6 @@
 <launch>
     <!--Sample file to launch rtabmap with a laser-->
-    
+
     <arg name="cam_front"                default="camera_front_cam" />
 
     <node name="rtabmap" pkg="rtabmap_ros" type="rtabmap" output="screen" args="--delete_db_on_start">

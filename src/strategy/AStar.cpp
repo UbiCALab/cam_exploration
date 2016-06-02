@@ -74,7 +74,12 @@ void AStar::init(int i)
     cost_rec = cost_rec_h = 10;
     cost_ver = cost_ver_h = 14;
     MarkerPublisher markers;
-    markers.add("AStar", "AStar");
+    if (!markers.has("AStar")){
+	std_msgs::ColorRGBA color;
+	color.r = 0.1; color.g = 0.2; color.b = 0.7; color.a = 1.0;
+	markers.add("AStar", "AStar");
+	markers.setProperty("AStar", color);
+    }
 }
 
 

@@ -26,6 +26,10 @@
 
 #include "cam_exploration/MapServer.h"
 
+#include <geometry_msgs/PointStamped.h>
+//#include <tf/tf.h>
+//#include <tf/Transformer.h>
+
 #include <boost/pending/disjoint_sets.hpp>
 #include <deque>
 
@@ -47,9 +51,11 @@ namespace cam_exploration{
 bool MapServer::map_received = false;
 bool MapServer::is_subscribed = false;
 nav_msgs::OccupancyGrid MapServer::map;
+nav_msgs::OccupancyGrid MapServer::costmap;
 nav_msgs::OccupancyGrid MapServer::frontier_map;
 FrontiersMap MapServer::fmap;
 ros::Subscriber MapServer::sub;
+ros::Subscriber MapServer::sub_cm;
 
 void MapServer::subscribeMap(const char *topic, void (*fcCallback)(FrontiersMap&), ros::NodeHandlePtr n,
 					ros::NodeHandlePtr n_private)
@@ -64,6 +70,12 @@ void MapServer::subscribeMap(const char *topic, void (*fcCallback)(FrontiersMap&
     fmap.getParams(n_private);
 
     is_subscribed = false;
+}
+
+
+void MapServer::subscribeCostMap(const char *topic, ros::NodeHandlePtr n, ros::NodeHandlePtr n_private)
+{
+    sub_cm = n->subscribe(topic, 1, &MapServer::costmapCallback, this);
 }
 
 
@@ -93,7 +105,7 @@ bool MapServer::isValidPoint(const geometry_msgs::Point & point)
 
 bool MapServer::isFree(int index)
 {
-    return map.data[index] <= 10;
+    return costmap.data[index] <= 10;
     //return isValidPoint(cell2point(index));
 }
 
@@ -106,7 +118,7 @@ bool MapServer::isFrontierCell(int cell)
 
 bool MapServer::isFree(const geometry_msgs::Point & point)
 {
-    int index = point2cell(point);
+    int index = point2cell(point, true);
     return isFree(index);
 }
 
@@ -121,6 +133,15 @@ void MapServer::occupancy_gridCallback(const nav_msgs::OccupancyGrid::ConstPtr& 
 
     frontier_map.data.resize(num_mapcells);
     findFrontiers();
+}
+
+
+// Costamap Callback: called each time a map message is received
+void MapServer::costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg)
+{
+    costmap=*msg;
+    int num_mapcells = map.info.width*map.info.height;
+    frontier_map.data.resize(num_mapcells);
 }
 
 
@@ -302,17 +323,20 @@ void MapServer::twoPassLabeling(vector<int>& labels)
 }
 
 
-int MapServer::point2cell(const geometry_msgs::Point & point)
+int MapServer::point2cell(const geometry_msgs::Point & point, bool isCostmap)
 {
-  if(point.x <= map.info.origin.position.x || point.x >= map.info.width*map.info.resolution + map.info.origin.position.x  ||
-     point.y <= map.info.origin.position.y || point.y >= map.info.height*map.info.resolution+ map.info.origin.position.y)
+
+    nav_msgs::OccupancyGrid pmap = isCostmap ? costmap : map;
+
+  if(point.x <= pmap.info.origin.position.x || point.x >= pmap.info.width*pmap.info.resolution + pmap.info.origin.position.x  ||
+     point.y <= pmap.info.origin.position.y || point.y >= pmap.info.height*pmap.info.resolution+ pmap.info.origin.position.y)
   {
     return -1;
   }
 
-  int x_cell = floor0((point.x - map.info.origin.position.x)/map.info.resolution);
-  int y_cell = floor0((point.y - map.info.origin.position.y)/map.info.resolution);
-  int cell = x_cell + (y_cell)*map.info.width;
+  int x_cell = floor0((point.x - pmap.info.origin.position.x)/pmap.info.resolution);
+  int y_cell = floor0((point.y - pmap.info.origin.position.y)/pmap.info.resolution);
+  int cell = x_cell + (y_cell)*pmap.info.width;
   return cell;
 }
 geometry_msgs::Point MapServer::cell2point(const int & cell)
@@ -321,6 +345,10 @@ geometry_msgs::Point MapServer::cell2point(const int & cell)
   point.x = (cell % map.info.width)*map.info.resolution + map.info.origin.position.x + map.info.resolution / 2;
   point.y = floor(cell/map.info.width)*map.info.resolution + map.info.origin.position.y + map.info.resolution / 2;
   return point;
+}
+int MapServer::point2cell(const geometry_msgs::Point & point)
+{
+    return point2cell(point, false);
 }
 
 void MapServer::getStraightPoints(int cell, int cells[])

@@ -51,10 +51,11 @@ public:
      * @brief Get the goal of a certain frontier
      *
      * @param frontier_in Frontier to be evaluated
+     * @param goal Goal to which the robot should move
      *
-     * @return Goal to which the robot should move
+     * @return True if a proper goal has been found
      */
-    virtual geometry_msgs::Pose decideGoal(const frontier& frontier_in) const = 0;
+    virtual bool decideGoal(const frontier& frontier_in, geometry_msgs::Pose & goal) const = 0;
     /**
      * @brief Get name of the goal decision object
      *
@@ -122,10 +123,11 @@ public:
      * @brief Select the middle point of the frontier \p frontier_in and returh a goal aiming at it
      *
      * @param frontier_in Incoming frontier
+     * @param goal Goal to which the robot should move
      *
-     * @return Goal pose
+     * @return True if a proper goal has been found
      */
-    geometry_msgs::Pose decideGoal(const frontier& frontier_in) const;
+    bool decideGoal(const frontier& frontier_in, geometry_msgs::Pose& goal) const;
     const char* name() const { return "Middle Point";}
 };
 

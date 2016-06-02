@@ -40,7 +40,6 @@ using namespace cam_exploration::strategy;
  */
 
 
-
 /**
  * @brief Alias for integer iterator loops
  */
@@ -69,11 +68,13 @@ strategy::goalSelector* goal_selector;
 geometry_msgs::Pose decideGoal()
 {
     geometry_msgs::Pose goal;
-    frontier f = fmap.max();
-    goal = goal_selector->decideGoal(f);
+    FrontiersMap::const_iterator f_it = fmap.begin();
+    while(!goal_selector->decideGoal(*f_it, goal)){
+    	f_it++;
+    }
 
     MarkerPublisher markers;
-    markers.publish("f_goal", f.points);
+    markers.publish("f_goal", f_it->points);
     markers.publish("goal", goal);
     return goal;
 }
@@ -120,6 +121,9 @@ void spin()
 
     // >> Subscribing map server to Map
     mapServer.subscribeMap("proj_map", getFrontiers, ros::NodeHandlePtr(new ros::NodeHandle()),
+				ros::NodeHandlePtr(new ros::NodeHandle("~")));
+    // >> Subscribing costmap server to Map
+    mapServer.subscribeCostMap("/move_base/global_costmap/costmap", ros::NodeHandlePtr(new ros::NodeHandle()),
 				ros::NodeHandlePtr(new ros::NodeHandle("~")));
 
     // >> Setting up replaning function
@@ -198,6 +202,7 @@ void spin()
 			if (first_time)
 			    first_time = false;
 
+			robot.printStatus();
 			robot.goTo(decideGoal());
 		    }
 		}

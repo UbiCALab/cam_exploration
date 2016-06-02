@@ -1,28 +1,3 @@
-
-/*
- * MIT License
- *
- * Copyright (c) 2016 Jordi Soler Busquets
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 #ifndef CAM_EXPLORATION_ROBOT_MOTION_H
 #define CAM_EXPLORATION_ROBOT_MOTION_H
 
@@ -91,11 +66,14 @@ public:
     bool goTo(const geometry_msgs::Pose& goal);		///< Send a new goal to the robot @return True if the goal could be sent properly
     void cancelGoal(){ ac_->cancelGoal();}		///< Cancel the current robot goal
     static geometry_msgs::Pose current_goal(){ return current_goal_;}	///< Get current robot goal
+    static void setFrontierPoint(const geometry_msgs::Point & p) {current_frontier_target_point_ = p;}
+    static geometry_msgs::Point current_frontier_target_point() {return current_frontier_target_point_;}
 
     // Robot status interface
     static int status() {return robot_status;}				///< Gets current robot status. @return current robot status.
     static bool isMoving() { return robot_status == MOVING;}		///< Check if robot is moving. @return True if it is moving.
     bool refreshPose() { return refreshRobotPosition();}		///< Updates the robot pose. @return True if there was no error.
+    void printStatus();
 
     // Possible robot_status
     static const int MOVING = 0;	///< The robot is moving towards the goal
@@ -111,6 +89,7 @@ private:
     static geometry_msgs::Pose robot_pose;		///< Current robot position
     static geometry_msgs::Pose prev_robot_pose;		///< Previous (in the previous call to refreshRobotPosition() robot position
     static geometry_msgs::Pose current_goal_;		///< Current robot goal
+    static geometry_msgs::Point current_frontier_target_point_; ///< Point of the current target frontier chosen as exploration target
 
     bool initialised;					///< True if RobotMotion has been initialised
 

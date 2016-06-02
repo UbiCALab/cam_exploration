@@ -159,6 +159,13 @@ frontier FrontiersMap::max()
     return *max_element(frontiers_.begin(), frontiers_.end(), compFrontierValues(fvalues));
 }
 
+
+FrontiersMap::const_iterator FrontiersMap::sbegin() {
+    frontiers_.sort(compFrontierValues(fvalues));
+    return begin();
+}
+
+
 bool compFrontierValues::operator()(const frontier& f1, const frontier& f2)
 {
     double c1 = 0, c2 = 0;

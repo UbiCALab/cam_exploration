@@ -40,6 +40,9 @@ namespace cam_exploration {
 geometry_msgs::Pose RobotMotion::robot_pose;
 geometry_msgs::Pose RobotMotion::prev_robot_pose;
 geometry_msgs::Pose RobotMotion::current_goal_;
+geometry_msgs::Point RobotMotion::current_frontier_target_point_;
+float travelled_distance;
+ros::Time start_time;
 
 int RobotMotion::robot_status, RobotMotion::number_of_goals_reached, RobotMotion::number_of_goals_sent;
 
@@ -50,6 +53,8 @@ void RobotMotion::init()
     if(!initialised){
 	ac_ = new actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction>("move_base", true);
 	listener = new tf::TransformListener();
+	travelled_distance = 0;
+	start_time = ros::Time::now();
     }
     else
     {
@@ -111,6 +116,12 @@ void RobotMotion::move_baseActive()
     robot_status = MOVING;
 }
 
+// Print robot status
+void RobotMotion::printStatus()
+{
+    ROS_INFO("Ellapsed time: %f, Travelled distance: %f", (ros::Time::now() - start_time).toSec(), travelled_distance);
+}
+
 
 // Refresh the position of the robot
 bool RobotMotion::refreshRobotPosition()
@@ -147,10 +158,10 @@ bool RobotMotion::refreshRobotPosition()
 	first=false;
     }
 
-    //float dist_incr=std::sqrt(std::pow(prev_robot_pose.position.x-robot_pose.position.x,2)+std::pow(prev_robot_pose.position.y-robot_pose.position.y,2));
-    //float angle_incr=fabs(tf::getYaw(prev_robot_pose.orientation)-tf::getYaw(robot_pose.orientation));
-    //float d=0.115; //half of the distance between wheels
-    //wheel_travelled_distance += (fabs(dist_incr+d*angle_incr)+fabs(dist_incr-d*angle_incr))/2.0f;
+    float dist_incr=std::sqrt(std::pow(prev_robot_pose.position.x-robot_pose.position.x,2)+std::pow(prev_robot_pose.position.y-robot_pose.position.y,2));
+    float angle_incr=fabs(tf::getYaw(prev_robot_pose.orientation)-tf::getYaw(robot_pose.orientation));
+    float d=0.228; //half of the distance between wheels
+    travelled_distance += (fabs(dist_incr+d*angle_incr)+fabs(dist_incr-d*angle_incr))/2.0f;
 
     prev_robot_pose=robot_pose;
     return true;

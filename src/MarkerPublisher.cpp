@@ -80,6 +80,17 @@ void pub::publish( geometry_msgs::Point p, int yaw) const
 }
 
 
+void pub::publish(const std::vector<int> & cells) const
+{
+    MapServer mserver;
+    std::vector<geometry_msgs::Point> points(cells.size());
+    for (std::vector<int>::const_iterator it = cells.begin(); it != cells.end(); it++){
+	points.push_back(mserver.cell2point(*it));
+    }
+    publish_(points);
+}
+
+
 void pub::publish_( geometry_msgs::Pose p ) const
 {
     visualization_msgs::Marker m = m_;
@@ -90,10 +101,16 @@ void pub::publish_( geometry_msgs::Pose p ) const
 void pub::publish_( const std::vector<geometry_msgs::Point>& points) const
 {
     std_msgs::ColorRGBA color;
-    color.a = 1.0;
-    color.r = 0.0;
-    color.g = 1.0;
-    color.b = 0.0;
+    if (m_.color.a == 0){
+	color.a = 1.0;
+	color.r = 0.0;
+	color.g = 1.0;
+	color.b = 0.0;
+    }
+    else
+    {
+    	color = m_.color;
+    }
 
     std::vector<std_msgs::ColorRGBA> c(points.size(), color);
 
@@ -174,6 +191,14 @@ void MarkerPublisher::add(const char* name, const char* topic, int type)
     ROS_INFO("MarkerPublisher: Advertised topic %s", topic);
 }
 
+bool MarkerPublisher::has(const char* name) const {
+    for(std::vector<pub>::iterator it = pubs.begin(); it != pubs.end(); ++it){
+	if (it->is(name)){
+	    return true;
+	}
+    }
+    return false;
+}
 
 } // namespace cam_exploration
 

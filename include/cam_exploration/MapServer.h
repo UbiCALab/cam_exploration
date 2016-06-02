@@ -63,6 +63,7 @@ public:
      * @param nptr_private Node handler used for getting parameters from the parameter server. Note that it may have different namespace than \p nptr
      */
     void subscribeMap(const char* topic, void (*frontiersMapCallback)(FrontiersMap&), ros::NodeHandlePtr nptr, ros::NodeHandlePtr nptr_private);
+    void subscribeCostMap(const char* topic, ros::NodeHandlePtr nptr, ros::NodeHandlePtr nptr_private);
     /**
      * @brief Checks wether a new OccupancyGrid has been received
      *
@@ -207,6 +208,7 @@ public:
      * @see cell2point(const int&)
      */
     int point2cell(const geometry_msgs::Point & point);
+    int point2cell(const geometry_msgs::Point & point, bool isCostmap);
     /**
      * @brief Conversion function
      *
@@ -224,10 +226,13 @@ private:
      * @brief Subscriber to the map
      */
     static ros::Subscriber sub;
+    static ros::Subscriber sub_cm;
     /**
      * @brief Map to be handled. This is the main variable of the class
      */
     static nav_msgs::OccupancyGrid map;
+    static nav_msgs::OccupancyGrid costmap;
+
     /**
      * @brief It is a map containing all frontiers points
      */
@@ -257,6 +262,7 @@ private:
      * @param msg Pointer to the new map
      */
     void occupancy_gridCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
+    void costmapCallback(const nav_msgs::OccupancyGrid::ConstPtr& msg);
     /**
      * @brief Find the frontiers in the map
      */

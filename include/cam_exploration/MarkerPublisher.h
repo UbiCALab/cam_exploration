@@ -85,7 +85,8 @@ public:
      * @copydoc publish(geometry_msgs::Pose) const
      * Uses line strips type
      */
-    void publish(std::vector<geometry_msgs::Point> p) const { publish_(p);}
+    void publish(const std::vector<geometry_msgs::Point> & p) const { publish_(p);}
+    void publish(const std::vector<int> & p) const;
 
     /**
      * @brief Set some base property(ies) of the marker message to be published
@@ -255,6 +256,7 @@ public:
 	}
     }
 
+    bool has(const char* name) const;
 
 
 private:

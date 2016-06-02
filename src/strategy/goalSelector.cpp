@@ -48,7 +48,12 @@ void goalSelector::init()
     nh.param<double>("distance_to_goal", distance_to_goal, 1);
 
     MarkerPublisher markers;
-    markers.add("goal_padding", "goal_padding", visualization_msgs::Marker::LINE_STRIP);
+    std_msgs::ColorRGBA color;
+    color.r = 0.2; color.g = 0.2; color.b = 0.6; color.a = 1.0;
+
+    markers.add("goal_padding", "goal_padding");
+    //markers.add("goal_padding", "goal_padding", visualization_msgs::Marker::LINE_STRIP);
+    markers.setProperty("goal_padding", color);
 }
 
 
@@ -62,11 +67,14 @@ geometry_msgs::Quaternion goalSelector::quat(double yaw) const
 bool goalSelector::aimAt(const geometry_msgs::Point& frontier_point,
 					geometry_msgs::Pose& goal_out) const
 {
-    MarkerPublisher markers;
+    //MarkerPublisher markers;
+    RobotMotion robot;
 
     geometry_msgs::Point p_goal, r_pose = RobotMotion::position();
     geometry_msgs::Pose goal;
     std::vector<geometry_msgs::Point> points;
+
+    robot.setFrontierPoint(frontier_point);
 
     double angle = atan2(r_pose.y - frontier_point.y, r_pose.x - frontier_point.x);
 
@@ -94,35 +102,42 @@ bool goalSelector::aimAt(const geometry_msgs::Point& frontier_point,
 	points.push_back(p_goal);
 	points.push_back(frontier_point);
 
-	markers.publish("goal_padding", points);
+	//markers.publish("goal_padding", points);
 	steps++;
     }
     while(!hasGoalAtSight(points) && turns < 2);
 
-    markers.publish("goal_padding", points);
+    //markers.publish("goal_padding", points);
 
     goal_out = goal;
 
-    return true;
+    return turns < 2;
 }
 
 
 bool goalSelector::hasGoalAtSight(const std::vector<geometry_msgs::Point>& points) const
 {
-    double step_size = 0.1, delta = 0;
-    int iterations = floor(distance_to_goal / step_size);
+    MarkerPublisher markers;
+
+    double step_size = 0.05, delta = 0;
+    double iterations = floor(distance_to_goal / step_size);
     bool collide = false;
     MapServer map_server;
+    std::vector<geometry_msgs::Point> samples;
     for (int i = 0; i < iterations && !collide; ++i) {
     	delta = i / iterations;
 	geometry_msgs::Point p;
 	p.x = points[0].x * delta + points[1].x * (1-delta);
 	p.y = points[0].y * delta + points[1].y * (1-delta);
 	p.z = 0;
+
+	samples.push_back(p);
     	if (!map_server.isFree(p)){
 	    collide = true;
 	}
     }
+
+    markers.publish("goal_padding", samples);
 
     // TODO Correct "collision detection"
     //const char* x = !collide ? "true" : "false";
@@ -131,12 +146,12 @@ bool goalSelector::hasGoalAtSight(const std::vector<geometry_msgs::Point>& point
 }
 
 
-geometry_msgs::Pose midPoint::decideGoal(const frontier& f) const
+bool midPoint::decideGoal(const frontier& f, geometry_msgs::Pose& goal) const
 {
     geometry_msgs::Point f_point = f.free_center_point;
-    geometry_msgs::Pose goal;
-    aimAt(f_point, goal);
-    return goal;
+    bool hasBeenFound = aimAt(f_point, goal);
+
+    return hasBeenFound;
 }
 
 
